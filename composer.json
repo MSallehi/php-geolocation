@@ -1,0 +1,34 @@
+{
+    "name": "msallehi/php-geolocation",
+    "description": "A PHP package to restrict access based on user's country/IP location - Works with Laravel, WordPress, and pure PHP",
+    "keywords": ["php", "geolocation", "ip", "country", "restriction", "iran", "laravel", "wordpress"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mohammad Salehi",
+            "email": "mohamad.salehi.dev@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "MSallehi\\GeoLocation\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MSallehi\\GeoLocation\\Tests\\": "tests/"
+        }
+    },
+    "suggest": {
+        "illuminate/support": "Required for Laravel integration (^9.0|^10.0|^11.0)"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
