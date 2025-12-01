@@ -2,29 +2,33 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/msallehi/php-geolocation.svg?style=flat-square)](https://packagist.org/packages/msallehi/php-geolocation)
 [![Total Downloads](https://img.shields.io/packagist/dt/msallehi/php-geolocation.svg?style=flat-square)](https://packagist.org/packages/msallehi/php-geolocation)
-
-یک پکیج PHP برای محدود کردن دسترسی کاربران بر اساس کشور / IP
+[![License](https://img.shields.io/packagist/l/msallehi/php-geolocation.svg?style=flat-square)](https://packagist.org/packages/msallehi/php-geolocation)
+[![PHP Version](https://img.shields.io/packagist/php-v/msallehi/php-geolocation.svg?style=flat-square)](https://packagist.org/packages/msallehi/php-geolocation)
 
 A PHP package to restrict user access based on their country/IP location. **Works with pure PHP, Laravel, WordPress, and any PHP framework.**
 
-## ✨ Features | ویژگی‌ها
+<p align="center">
+  <a href="./README.fa.md">🇮🇷 مستندات فارسی</a>
+</p>
 
-- 🌍 تشخیص خودکار کشور از روی IP
-- 🔒 محدود کردن دسترسی به کشورهای خاص
-- ⚙️ تنظیمات کاملاً قابل تغییر
-- 🔧 پشتیبانی از چندین API Provider
-- 📝 پیام‌های خطای سفارشی
-- 🎯 سازگار با PHP خالص، لاراول و وردپرس
+## ✨ Features
 
-## 📦 Installation | نصب
+- 🌍 Automatic country detection from IP address
+- 🔒 Restrict access to specific countries
+- ⚙️ Fully customizable configuration
+- 🔧 Multiple API provider support
+- 📝 Custom error messages
+- 🎯 Compatible with pure PHP, Laravel, and WordPress
+
+## 📦 Installation
 
 ```bash
 composer require msallehi/php-geolocation
 ```
 
-## 🚀 Quick Start | شروع سریع
+## 🚀 Quick Start
 
-### Pure PHP | پی‌اچ‌پی خالص
+### Pure PHP
 
 ```php
 <?php
@@ -32,29 +36,29 @@ require 'vendor/autoload.php';
 
 use MSallehi\GeoLocation\GeoLocation;
 
-// ایجاد نمونه با تنظیمات پیش‌فرض (فقط ایران)
+// Create instance with default settings (Iran only)
 $geo = new GeoLocation();
 
-// یا با تنظیمات سفارشی
+// Or with custom settings
 $geo = new GeoLocation([
     'allowed_countries' => ['IR', 'TR'],
     'messages' => [
-        'not_allowed' => 'دسترسی از کشور شما امکان‌پذیر نیست.',
+        'not_allowed' => 'Access from your country is not allowed.',
     ],
 ]);
 
-// چک کردن دسترسی
+// Check access
 if ($geo->isAllowed()) {
-    echo "خوش آمدید!";
+    echo "Welcome!";
 } else {
-    echo "دسترسی ندارید";
+    echo "Access denied";
 }
 
-// یا استفاده از guard برای بلاک خودکار
-$geo->guard(); // اگر مجاز نباشد، خودکار خطای 403 می‌دهد
+// Or use guard for automatic blocking
+$geo->guard(); // Automatically returns 403 error if not allowed
 ```
 
-### Static Factory | فکتوری استاتیک
+### Static Factory
 
 ```php
 use MSallehi\GeoLocation\GeoLocation;
@@ -62,28 +66,28 @@ use MSallehi\GeoLocation\GeoLocation;
 GeoLocation::create(['allowed_countries' => ['IR']])->guard();
 ```
 
-## 📖 Full Documentation | مستندات کامل
+## 📖 Full Documentation
 
-### Basic Usage | استفاده پایه
+### Basic Usage
 
 ```php
 use MSallehi\GeoLocation\GeoLocation;
 
 $geo = new GeoLocation();
 
-// دریافت کشور کاربر
+// Get user's country
 $country = $geo->getCountryFromIp();
-echo "کشور شما: " . $country; // IR, US, GB, ...
+echo "Your country: " . $country; // IR, US, GB, ...
 
-// دریافت IP کاربر
+// Get user's IP
 $ip = $geo->getClientIp();
 
-// چک کردن مجاز بودن
+// Check if allowed
 if ($geo->isAllowed()) {
-    // کاربر مجاز است
+    // User is allowed
 }
 
-// دریافت اطلاعات کامل موقعیت
+// Get full location details
 $location = $geo->getLocationDetails();
 // [
 //     'ip' => '5.160.139.15',
@@ -95,7 +99,7 @@ $location = $geo->getLocationDetails();
 // ]
 ```
 
-### Exception Handling | مدیریت خطا
+### Exception Handling
 
 ```php
 use MSallehi\GeoLocation\GeoLocation;
@@ -106,54 +110,54 @@ $geo = new GeoLocation(['allowed_countries' => ['IR']]);
 
 try {
     $geo->validate();
-    // کاربر مجاز است
+    // User is allowed
 } catch (CountryNotAllowedException $e) {
     echo $e->getMessage();
-    echo "کشور شما: " . $e->getDetectedCountry();
-    echo "کشورهای مجاز: " . implode(', ', $e->getAllowedCountries());
+    echo "Your country: " . $e->getDetectedCountry();
+    echo "Allowed countries: " . implode(', ', $e->getAllowedCountries());
     
-    // تبدیل به JSON
+    // Convert to JSON
     echo $e->toJson();
 } catch (GeoLocationException $e) {
-    echo "خطا در تشخیص موقعیت: " . $e->getMessage();
+    echo "Location detection error: " . $e->getMessage();
 }
 ```
 
-### Dynamic Configuration | تنظیم پویا
+### Dynamic Configuration
 
 ```php
 $geo = new GeoLocation();
 
-// تغییر کشورهای مجاز
+// Change allowed countries
 $geo->setAllowedCountries(['IR', 'US', 'GB']);
 
-// اضافه کردن کشور
+// Add country
 $geo->addAllowedCountry('DE');
 
-// حذف کشور
+// Remove country
 $geo->removeAllowedCountry('US');
 
-// تغییر پیام خطا
-$geo->setMessage('not_allowed', 'متأسفانه این سرویس در کشور شما در دسترس نیست.');
+// Change error message
+$geo->setMessage('not_allowed', 'This service is not available in your country.');
 
-// تغییر API Provider
+// Change API Provider
 $geo->setApiProvider('ipinfo', ['token' => 'your-token']);
 
-// چک کردن یک کشور خاص
+// Check specific country
 if ($geo->isCountryAllowed('IR')) {
-    echo "ایران مجاز است";
+    echo "Iran is allowed";
 }
 
-// دریافت لیست کشورهای مجاز
+// Get allowed countries list
 $countries = $geo->getAllowedCountries();
 ```
 
-### Check Specific IP | چک کردن IP خاص
+### Check Specific IP
 
 ```php
 $geo = new GeoLocation(['allowed_countries' => ['IR']]);
 
-// چک کردن IP خاص
+// Check specific IP
 $isAllowed = $geo->isAllowed('5.160.139.15');
 $country = $geo->getCountryFromIp('8.8.8.8');
 $location = $geo->getLocationDetails('1.1.1.1');
@@ -161,11 +165,11 @@ $location = $geo->getLocationDetails('1.1.1.1');
 
 ---
 
-## 🔵 Laravel Integration | یکپارچگی با لاراول
+## 🔵 Laravel Integration
 
 ### Register Service Provider
 
-در `config/app.php`:
+In `config/app.php`:
 
 ```php
 'providers' => [
@@ -190,14 +194,14 @@ php artisan vendor:publish --tag=geolocation-config
 ```php
 // routes/web.php
 
-// فقط کاربران ایرانی
+// Only Iranian users
 Route::middleware(['geolocation'])->group(function () {
     Route::get('/iran-only', function () {
-        return 'خوش آمدید!';
+        return 'Welcome!';
     });
 });
 
-// تعیین کشورها در middleware
+// Specify countries in middleware
 Route::middleware(['geolocation:IR,US,GB'])->group(function () {
     Route::get('/multi-country', function () {
         return 'Welcome!';
@@ -211,7 +215,7 @@ Route::middleware(['geolocation:IR,US,GB'])->group(function () {
 use MSallehi\GeoLocation\Laravel\GeoLocationFacade as GeoLocation;
 
 if (GeoLocation::isAllowed()) {
-    // کاربر مجاز است
+    // User is allowed
 }
 
 $country = GeoLocation::getCountryFromIp();
@@ -219,11 +223,11 @@ $country = GeoLocation::getCountryFromIp();
 
 ---
 
-## 🟢 WordPress Integration | یکپارچگی با وردپرس
+## 🟢 WordPress Integration
 
 ### Basic Setup
 
-در `functions.php` تم یا پلاگین خود:
+In your theme's `functions.php` or plugin:
 
 ```php
 require_once get_template_directory() . '/vendor/autoload.php';
@@ -233,21 +237,21 @@ require_once get_template_directory() . '/vendor/msallehi/php-geolocation/src/Wo
 ### Using Helper Functions
 
 ```php
-// دریافت کشور
+// Get country
 $country = geo_get_country();
 
-// چک کردن دسترسی
+// Check access
 if (geo_is_allowed()) {
-    echo "خوش آمدید!";
+    echo "Welcome!";
 }
 
-// بلاک خودکار
-geo_guard(); // اگر مجاز نباشد، wp_die می‌کند
+// Automatic block
+geo_guard(); // Calls wp_die if not allowed
 
-// تنظیم کشورها
+// Set countries
 geo_set_countries(['IR', 'TR']);
 
-// دریافت اطلاعات کامل
+// Get full details
 $location = geo_get_location();
 ```
 
@@ -255,18 +259,18 @@ $location = geo_get_location();
 
 ```html
 [geo_restrict country="IR"]
-این محتوا فقط برای کاربران ایرانی قابل مشاهده است.
+This content is only visible to Iranian users.
 [/geo_restrict]
 
-[geo_restrict country="IR,US,GB" message="فقط برای کشورهای منتخب"]
-محتوای خاص
+[geo_restrict country="IR,US,GB" message="Only for selected countries"]
+Special content
 [/geo_restrict]
 ```
 
 ### Restrict Entire Page
 
 ```php
-// در functions.php
+// In functions.php
 add_action('template_redirect', function() {
     if (is_page('iran-only')) {
         geo_wp_restrict(['IR']);
@@ -277,26 +281,26 @@ add_action('template_redirect', function() {
 ### Custom Restriction in Template
 
 ```php
-// در template file
+// In template file
 <?php
 $geo = new \MSallehi\GeoLocation\GeoLocation([
     'allowed_countries' => ['IR'],
-    'messages' => ['not_allowed' => 'این صفحه برای کشور شما در دسترس نیست.']
+    'messages' => ['not_allowed' => 'This page is not available in your country.']
 ]);
 
 if (!$geo->isAllowed()): ?>
     <div class="access-denied">
-        <h2>دسترسی محدود</h2>
-        <p>کشور شما: <?php echo $geo->getCountryFromIp(); ?></p>
+        <h2>Access Restricted</h2>
+        <p>Your country: <?php echo $geo->getCountryFromIp(); ?></p>
     </div>
 <?php else: ?>
-    <!-- محتوای صفحه -->
+    <!-- Page content -->
 <?php endif; ?>
 ```
 
 ---
 
-## 🌐 API Providers | سرویس‌دهندگان API
+## 🌐 API Providers
 
 ### ip-api (Default - Free)
 
@@ -326,31 +330,31 @@ $geo = new GeoLocation([
 
 ---
 
-## ⚙️ Full Configuration | تنظیمات کامل
+## ⚙️ Full Configuration
 
 ```php
 $config = [
-    // کشورهای مجاز
+    // Allowed countries
     'allowed_countries' => ['IR'],
     
-    // سرویس API
+    // API service
     'api_provider' => 'ip-api', // ip-api, ipinfo, ipdata
     
-    // کلیدهای API
+    // API keys
     'ipinfo_token' => '',
     'ipdata_api_key' => '',
     
-    // timeout درخواست
+    // Request timeout
     'timeout' => 5,
     
-    // IP محلی
+    // Local IP
     'allow_local' => true,
     'local_country' => 'LOCAL',
     
-    // پیام‌های خطا
+    // Error messages
     'messages' => [
-        'not_allowed' => 'دسترسی از کشور شما امکان‌پذیر نیست.',
-        'api_error' => 'امکان تشخیص موقعیت شما وجود ندارد.',
+        'not_allowed' => 'Access from your country is not allowed.',
+        'api_error' => 'Unable to determine your location.',
     ],
 ];
 
@@ -359,7 +363,7 @@ $geo = new GeoLocation($config);
 
 ---
 
-## 📝 Custom Error Messages | پیام‌های خطای سفارشی
+## 📝 Custom Error Messages
 
 ### In Constructor
 
@@ -382,15 +386,15 @@ $geo->setMessage('not_allowed', 'Access denied from your country.');
 
 ```php
 if (!$geo->isAllowed()) {
-    $geo->denyAccess('پیام سفارشی شما', 403);
+    $geo->denyAccess('Your custom message', 403);
 }
 ```
 
 ---
 
-## 📋 Country Codes | کدهای کشور
+## 📋 Country Codes
 
-استفاده از کدهای ISO 3166-1 alpha-2:
+Use ISO 3166-1 alpha-2 codes:
 
 | Country | Code |
 |---------|------|
@@ -405,7 +409,7 @@ if (!$geo->isAllowed()) {
 | UAE | AE |
 | Saudi Arabia | SA |
 
-[لیست کامل](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+[Full list](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
 
 ---
 
@@ -416,3 +420,11 @@ The MIT License (MIT). Please see [License File](LICENSE) for more information.
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 👨‍💻 Author
+
+- **Mohammad Salehi** - [GitHub](https://github.com/MSallehi)
+
+## ⭐ Support
+
+If you find this package useful, please give it a star on GitHub!
