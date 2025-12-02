@@ -38,6 +38,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Fallback Providers
+    |--------------------------------------------------------------------------
+    |
+    | List of providers to try if the primary provider fails.
+    | The package will try each provider in order until one succeeds.
+    |
+    */
+    'fallback_providers' => ['ip-api', 'ipinfo'],
+
+    /*
+    |--------------------------------------------------------------------------
     | API Keys
     |--------------------------------------------------------------------------
     |
@@ -49,13 +60,37 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Timeout
+    | Timeout Settings
     |--------------------------------------------------------------------------
     |
     | The maximum time (in seconds) to wait for API response.
     |
     */
     'timeout' => 5,
+    'connect_timeout' => 3,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Retry Settings
+    |--------------------------------------------------------------------------
+    |
+    | Number of times to retry API calls on failure.
+    |
+    */
+    'retry_count' => 2,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Fallback Allow
+    |--------------------------------------------------------------------------
+    |
+    | If true, users will be ALLOWED access when API fails.
+    | If false, users will be DENIED access when API fails.
+    | 
+    | Recommended: true (don't block legitimate users due to API issues)
+    |
+    */
+    'fallback_allow' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -67,6 +102,17 @@ return [
     */
     'allow_local' => true,
     'local_country' => 'LOCAL',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cache Settings
+    |--------------------------------------------------------------------------
+    |
+    | Enable caching for IP lookups to improve performance.
+    |
+    */
+    'cache_enabled' => true,
+    'cache_ttl' => 3600, // 1 hour
 
     /*
     |--------------------------------------------------------------------------

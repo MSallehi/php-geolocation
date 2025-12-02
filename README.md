@@ -8,7 +8,8 @@
 A PHP package to restrict user access based on their country/IP location. **Works with pure PHP, Laravel, WordPress, and any PHP framework.**
 
 <p align="center">
-  <a href="./README.fa.md">🇮🇷 مستندات فارسی</a>
+  <a href="./README.fa.md">🇮🇷 مستندات فارسی</a> |
+  <a href="./CHANGELOG.md">📋 Changelog</a>
 </p>
 
 ## ✨ Features
@@ -18,6 +19,7 @@ A PHP package to restrict user access based on their country/IP location. **Work
 - ⚙️ Fully customizable configuration
 - 🔧 Multiple API provider support
 - 📝 Custom error messages
+- 🔄 Automatic fallback when API fails (v1.1.0+)
 - 🎯 Compatible with pure PHP, Laravel, and WordPress
 
 ## 📦 Installation

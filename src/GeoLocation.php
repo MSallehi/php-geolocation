@@ -11,12 +11,14 @@ class GeoLocation
 {
     protected Client $client;
     protected array $config;
+    protected static array $cache = [];
 
     public function __construct(array $config = [])
     {
         $this->config = array_merge($this->getDefaultConfig(), $config);
         $this->client = new Client([
             'timeout' => $this->config['timeout'],
+            'connect_timeout' => $this->config['connect_timeout'] ?? 3,
         ]);
     }
 
@@ -29,12 +31,16 @@ class GeoLocation
             'allowed_countries' => ['IR'],
             'api_provider' => 'ip-api',
             'timeout' => 5,
+            'connect_timeout' => 3,
             'messages' => [
                 'not_allowed' => 'Access from your country is not allowed.',
                 'api_error' => 'Unable to determine your location.',
             ],
             'cache_enabled' => true,
             'cache_ttl' => 3600,
+            'fallback_allow' => true, // Allow access if API fails
+            'retry_count' => 2,
+            'fallback_providers' => ['ip-api', 'ipinfo'], // Fallback order
         ];
     }
 
@@ -49,9 +55,32 @@ class GeoLocation
             return $this->config['local_country'] ?? 'LOCAL';
         }
 
+        // Check cache first
+        if ($this->config['cache_enabled'] && isset(self::$cache[$ip])) {
+            $cached = self::$cache[$ip];
+            if ($cached['expires'] > time()) {
+                return $cached['country_code'];
+            }
+            unset(self::$cache[$ip]);
+        }
+
         try {
-            return $this->fetchCountryFromApi($ip);
-        } catch (GuzzleException $e) {
+            $countryCode = $this->fetchCountryFromApiWithFallback($ip);
+            
+            // Cache the result
+            if ($this->config['cache_enabled']) {
+                self::$cache[$ip] = [
+                    'country_code' => $countryCode,
+                    'expires' => time() + $this->config['cache_ttl'],
+                ];
+            }
+            
+            return $countryCode;
+        } catch (\Exception $e) {
+            // If fallback_allow is true, return null (will be treated as allowed)
+            if ($this->config['fallback_allow']) {
+                return null;
+            }
             throw new GeoLocationException(
                 $this->config['messages']['api_error'],
                 0,
@@ -65,13 +94,23 @@ class GeoLocation
      */
     public function isAllowed(?string $ip = null): bool
     {
-        $country = $this->getCountryFromIp($ip);
+        try {
+            $country = $this->getCountryFromIp($ip);
+            
+            // If country is null (API failed and fallback_allow is true), allow access
+            if ($country === null) {
+                return true;
+            }
 
-        if ($country === 'LOCAL') {
-            return $this->config['allow_local'] ?? true;
+            if ($country === 'LOCAL') {
+                return $this->config['allow_local'] ?? true;
+            }
+
+            return in_array($country, $this->config['allowed_countries'], true);
+        } catch (\Exception $e) {
+            // On any error, check fallback_allow setting
+            return $this->config['fallback_allow'] ?? true;
         }
-
-        return in_array($country, $this->config['allowed_countries'], true);
     }
 
     /**
@@ -107,16 +146,63 @@ class GeoLocation
             ];
         }
 
-        return $this->fetchLocationFromApi($ip);
+        try {
+            return $this->fetchLocationFromApi($ip);
+        } catch (\Exception $e) {
+            return [
+                'ip' => $ip,
+                'country_code' => null,
+                'country_name' => null,
+                'city' => null,
+                'region' => null,
+                'is_local' => false,
+                'error' => $e->getMessage(),
+            ];
+        }
     }
 
     /**
-     * Fetch country code from API
+     * Fetch country code from API with fallback providers
+     */
+    protected function fetchCountryFromApiWithFallback(string $ip): string
+    {
+        $providers = $this->config['fallback_providers'] ?? ['ip-api', 'ipinfo'];
+        $lastException = null;
+        
+        // Make sure primary provider is first
+        $primaryProvider = $this->config['api_provider'];
+        if (!in_array($primaryProvider, $providers)) {
+            array_unshift($providers, $primaryProvider);
+        } else {
+            // Move primary to front
+            $providers = array_diff($providers, [$primaryProvider]);
+            array_unshift($providers, $primaryProvider);
+        }
+        
+        foreach ($providers as $provider) {
+            for ($retry = 0; $retry < ($this->config['retry_count'] ?? 2); $retry++) {
+                try {
+                    $response = $this->callApiByProvider($provider, $ip);
+                    return $response['country_code'] ?? 'UNKNOWN';
+                } catch (\Exception $e) {
+                    $lastException = $e;
+                    // Small delay before retry
+                    if ($retry < ($this->config['retry_count'] ?? 2) - 1) {
+                        usleep(100000); // 100ms
+                    }
+                }
+            }
+        }
+        
+        throw $lastException ?? new GeoLocationException("All API providers failed for IP: {$ip}");
+    }
+
+    /**
+     * Fetch country code from API (legacy method)
      */
     protected function fetchCountryFromApi(string $ip): string
     {
-        $response = $this->callApi($ip);
-        return $response['country_code'] ?? 'UNKNOWN';
+        return $this->fetchCountryFromApiWithFallback($ip);
     }
 
     /**
@@ -125,6 +211,19 @@ class GeoLocation
     protected function fetchLocationFromApi(string $ip): array
     {
         return $this->callApi($ip);
+    }
+
+    /**
+     * Call API by provider name
+     */
+    protected function callApiByProvider(string $provider, string $ip): array
+    {
+        return match ($provider) {
+            'ip-api' => $this->callIpApi($ip),
+            'ipinfo' => $this->callIpInfo($ip),
+            'ipdata' => $this->callIpData($ip),
+            default => $this->callIpApi($ip),
+        };
     }
 
     /**
