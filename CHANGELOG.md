@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.2.0] - 2024-12-02
+## [1.2.0] - 2025-12-03
 
 ### Added
 - **CDN Country Header Detection**: Automatic country detection from CDN/proxy headers (Cloudflare, CloudFront, Vercel, NGINX GeoIP)
@@ -39,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.1.0] - 2024-12-02
+## [1.1.0] - 2025-12-02
 
 ### Added
 - **Fallback Allow**: New `fallback_allow` config option - when API fails, users are allowed by default (prevents blocking legitimate users due to API issues)
@@ -66,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.0] - 2024-12-01
+## [1.0.0] - 2025-12-01
 
 ### Added
 - Initial release
