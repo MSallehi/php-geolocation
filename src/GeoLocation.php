@@ -46,16 +46,31 @@ class GeoLocation
 
     /**
      * Get country code from IP address
+     * 
+     * Priority order:
+     * 1. CDN/Proxy country headers (Cloudflare, CloudFront, etc.) - Fast & Free
+     * 2. In-memory cache
+     * 3. GeoIP API call
      */
     public function getCountryFromIp(?string $ip = null): ?string
     {
+        // PRIORITY 1: Check CDN/Proxy country headers (fast, free, reliable)
+        // This works when site is behind Cloudflare, CloudFront, or has GeoIP module
+        if ($ip === null) {
+            $cdnCountry = $this->getCountryFromCdnHeaders();
+            if ($cdnCountry !== null) {
+                return $cdnCountry;
+            }
+        }
+
+        // PRIORITY 2: Get IP and check local
         $ip = $ip ?? $this->getClientIp();
 
         if ($this->isLocalIp($ip)) {
             return $this->config['local_country'] ?? 'LOCAL';
         }
 
-        // Check cache first
+        // PRIORITY 3: Check cache
         if ($this->config['cache_enabled'] && isset(self::$cache[$ip])) {
             $cached = self::$cache[$ip];
             if ($cached['expires'] > time()) {
@@ -64,6 +79,7 @@ class GeoLocation
             unset(self::$cache[$ip]);
         }
 
+        // PRIORITY 4: Call GeoIP API
         try {
             $countryCode = $this->fetchCountryFromApiWithFallback($ip);
             
@@ -87,6 +103,41 @@ class GeoLocation
                 $e
             );
         }
+    }
+
+    /**
+     * Get country code from CDN/Proxy headers
+     * 
+     * Many CDN providers and reverse proxies add country headers automatically.
+     * This is faster and more reliable than API calls.
+     * 
+     * @return string|null Country code (ISO 3166-1 alpha-2) or null if not available
+     */
+    protected function getCountryFromCdnHeaders(): ?string
+    {
+        $cdnCountryHeaders = [
+            'HTTP_CF_IPCOUNTRY',               // Cloudflare
+            'HTTP_CLOUDFRONT_VIEWER_COUNTRY',  // AWS CloudFront
+            'HTTP_X_VERCEL_IP_COUNTRY',        // Vercel
+            'HTTP_X_COUNTRY_CODE',             // Generic proxy header
+            'HTTP_GEOIP_COUNTRY_CODE',         // NGINX/Apache GeoIP module
+            'HTTP_X_GEO_COUNTRY',              // Some CDNs
+        ];
+        
+        foreach ($cdnCountryHeaders as $header) {
+            if (!empty($_SERVER[$header])) {
+                $country = strtoupper(trim($_SERVER[$header]));
+                
+                // Validate: must be exactly 2 uppercase letters
+                // XX means Cloudflare couldn't determine the country
+                // T1 means Tor exit node in Cloudflare
+                if ($country !== 'XX' && $country !== 'T1' && preg_match('/^[A-Z]{2}$/', $country)) {
+                    return $country;
+                }
+            }
+        }
+        
+        return null;
     }
 
     /**

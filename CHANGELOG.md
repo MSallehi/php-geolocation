@@ -11,6 +11,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2024-12-02
+
+### Added
+- **CDN Country Header Detection**: Automatic country detection from CDN/proxy headers (Cloudflare, CloudFront, Vercel, NGINX GeoIP)
+  - `HTTP_CF_IPCOUNTRY` - Cloudflare
+  - `HTTP_CLOUDFRONT_VIEWER_COUNTRY` - AWS CloudFront
+  - `HTTP_X_VERCEL_IP_COUNTRY` - Vercel
+  - `HTTP_GEOIP_COUNTRY_CODE` - NGINX/Apache GeoIP module
+  - `HTTP_X_COUNTRY_CODE` - Generic proxy header
+  - `HTTP_X_GEO_COUNTRY` - Some CDNs
+- **New Method**: `getCountryFromCdnHeaders()` - Get country from CDN headers directly
+
+### Changed
+- **Performance Improvement**: CDN headers are now checked FIRST before any API call
+- Country detection priority order:
+  1. CDN/Proxy headers (instant, free, no API call)
+  2. In-memory cache
+  3. GeoIP API call with fallback
+- Special handling for Cloudflare's `XX` (unknown) and `T1` (Tor exit) codes
+
+### Why This Matters
+- **Zero API Calls**: If behind Cloudflare, CloudFront, or similar, no external API calls needed
+- **Instant Response**: CDN headers are available immediately in `$_SERVER`
+- **Cost Savings**: No API rate limits or paid API usage when using CDN headers
+- **Reliability**: CDN country detection is more reliable than third-party APIs
+
+---
+
 ## [1.1.0] - 2024-12-02
 
 ### Added
