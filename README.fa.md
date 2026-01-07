@@ -382,6 +382,39 @@ $geo = new GeoLocation([
 
 <div dir="rtl">
 
+### ip-api.ir (API ایرانی - پیشنهادی برای سرورهای ایران) 🇮🇷
+
+بهینه‌شده برای سرورهای مستقر در ایران. وقتی API های بین‌المللی کند یا مسدود هستند، این سرویس به خوبی کار می‌کند.
+
+</div>
+
+```php
+$geo = new GeoLocation([
+    'api_provider' => 'ip-api-ir',
+]);
+
+// با GUID اختیاری برای امکانات پرمیوم
+$geo = new GeoLocation([
+    'api_provider' => 'ip-api-ir',
+    'ip_api_ir_guid' => 'your-guid', // اختیاری
+]);
+```
+
+<div dir="rtl">
+
+> 📍 **نکته**: اگر سرور شما در ایران است، از `ip-api-ir` به عنوان provider اصلی و `ip-api` به عنوان fallback استفاده کنید:
+
+</div>
+
+```php
+$geo = new GeoLocation([
+    'api_provider' => 'ip-api-ir',
+    'fallback_providers' => ['ip-api-ir', 'ip-api'],
+]);
+```
+
+<div dir="rtl">
+
 ### ipinfo.io
 
 </div>
@@ -420,11 +453,15 @@ $config = [
     'allowed_countries' => ['IR'],
     
     // سرویس API
-    'api_provider' => 'ip-api', // ip-api, ipinfo, ipdata
+    'api_provider' => 'ip-api', // ip-api, ip-api-ir, ipinfo, ipdata
+    
+    // سرویس‌های fallback (به ترتیب امتحان می‌شوند)
+    'fallback_providers' => ['ip-api', 'ip-api-ir'],
     
     // کلیدهای API
     'ipinfo_token' => '',
     'ipdata_api_key' => '',
+    'ip_api_ir_guid' => '', // اختیاری برای ip-api.ir
     
     // timeout درخواست
     'timeout' => 5,

@@ -27,11 +27,12 @@ return [
     |--------------------------------------------------------------------------
     |
     | The geolocation API provider to use for IP lookup.
-    | Supported: 'ip-api', 'ipinfo', 'ipdata'
+    | Supported: 'ip-api', 'ip-api-ir', 'ipinfo', 'ipdata'
     |
-    | 'ip-api' - Free, no API key required (http://ip-api.com)
-    | 'ipinfo' - Free tier available, API key optional (https://ipinfo.io)
-    | 'ipdata' - Requires API key (https://ipdata.co)
+    | 'ip-api'    - Free, no API key required (http://ip-api.com)
+    | 'ip-api-ir' - Iranian GeoIP API, optimized for Iranian servers (https://ip-api.ir)
+    | 'ipinfo'    - Free tier available, API key optional (https://ipinfo.io)
+    | 'ipdata'    - Requires API key (https://ipdata.co)
     |
     */
     'api_provider' => 'ip-api',
@@ -57,6 +58,7 @@ return [
     */
     'ipinfo_token' => '',
     'ipdata_api_key' => '',
+    'ip_api_ir_guid' => '', // Optional GUID for ip-api.ir
 
     /*
     |--------------------------------------------------------------------------

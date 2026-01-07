@@ -312,6 +312,30 @@ $geo = new GeoLocation([
 ]);
 ```
 
+### ip-api.ir (Iranian API - Recommended for Iranian Servers) 🇮🇷
+
+Optimized for servers located in Iran. Works reliably when international APIs might be slow or blocked.
+
+```php
+$geo = new GeoLocation([
+    'api_provider' => 'ip-api-ir',
+]);
+
+// With optional GUID for premium features
+$geo = new GeoLocation([
+    'api_provider' => 'ip-api-ir',
+    'ip_api_ir_guid' => 'your-guid', // Optional
+]);
+```
+
+> 📍 **Tip**: If your server is in Iran, use `ip-api-ir` as the primary provider and `ip-api` as fallback:
+> ```php
+> $geo = new GeoLocation([
+>     'api_provider' => 'ip-api-ir',
+>     'fallback_providers' => ['ip-api-ir', 'ip-api'],
+> ]);
+> ```
+
 ### ipinfo.io
 
 ```php
@@ -340,11 +364,15 @@ $config = [
     'allowed_countries' => ['IR'],
     
     // API service
-    'api_provider' => 'ip-api', // ip-api, ipinfo, ipdata
+    'api_provider' => 'ip-api', // ip-api, ip-api-ir, ipinfo, ipdata
+    
+    // Fallback providers (tried in order if primary fails)
+    'fallback_providers' => ['ip-api', 'ip-api-ir'],
     
     // API keys
     'ipinfo_token' => '',
     'ipdata_api_key' => '',
+    'ip_api_ir_guid' => '', // Optional for ip-api.ir
     
     // Request timeout
     'timeout' => 5,

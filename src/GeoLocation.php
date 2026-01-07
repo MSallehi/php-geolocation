@@ -271,6 +271,7 @@ class GeoLocation
     {
         return match ($provider) {
             'ip-api' => $this->callIpApi($ip),
+            'ip-api-ir' => $this->callIpApiIr($ip),
             'ipinfo' => $this->callIpInfo($ip),
             'ipdata' => $this->callIpData($ip),
             default => $this->callIpApi($ip),
@@ -286,6 +287,7 @@ class GeoLocation
 
         return match ($provider) {
             'ip-api' => $this->callIpApi($ip),
+            'ip-api-ir' => $this->callIpApiIr($ip),
             'ipinfo' => $this->callIpInfo($ip),
             'ipdata' => $this->callIpData($ip),
             default => $this->callIpApi($ip),
@@ -356,6 +358,38 @@ class GeoLocation
             'country_name' => $data['country_name'] ?? null,
             'city' => $data['city'] ?? null,
             'region' => $data['region'] ?? null,
+            'is_local' => false,
+        ];
+    }
+
+    /**
+     * Call ip-api.ir (Iranian GeoIP service, optimized for Iranian servers)
+     * 
+     * This is a Persian/Iranian geolocation API that works well from Iranian servers
+     * where international APIs might be slow or blocked.
+     * 
+     * @see https://ip-api.ir/
+     */
+    protected function callIpApiIr(string $ip): array
+    {
+        $guid = $this->config['ip_api_ir_guid'] ?? '';
+        
+        // Build URL based on whether GUID is provided
+        if ($guid) {
+            $url = "https://ip-api.ir/info/{$guid}/{$ip}";
+        } else {
+            $url = "https://ip-api.ir/info/{$ip}/country,countryCode,regionName,city";
+        }
+
+        $response = $this->client->get($url);
+        $data = json_decode($response->getBody()->getContents(), true);
+
+        return [
+            'ip' => $ip,
+            'country_code' => $data['countryCode'] ?? null,
+            'country_name' => $data['country'] ?? null,
+            'city' => $data['city'] ?? null,
+            'region' => $data['regionName'] ?? null,
             'is_local' => false,
         ];
     }

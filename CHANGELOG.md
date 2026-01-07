@@ -11,6 +11,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-01-07
+
+### Added
+- **Iranian GeoIP API**: New `ip-api-ir` provider for servers located in Iran ([ip-api.ir](https://ip-api.ir))
+  - Optimized for Iranian servers where international APIs might be slow or blocked
+  - Supports optional GUID for premium features
+  - New config option: `ip_api_ir_guid`
+- **New Method**: `callIpApiIr()` - Call the Iranian GeoIP API directly
+
+### Changed
+- Updated `api_provider` options: now supports `'ip-api'`, `'ip-api-ir'`, `'ipinfo'`, `'ipdata'`
+- Documentation updated with ip-api.ir usage examples
+
+### Recommended for Iranian Servers
+```php
+$geo = new GeoLocation([
+    'api_provider' => 'ip-api-ir',
+    'fallback_providers' => ['ip-api-ir', 'ip-api'],
+]);
+```
+
+---
+
 ## [1.2.0] - 2025-12-03
 
 ### Added
